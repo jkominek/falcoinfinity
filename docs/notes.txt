@@ -1,0 +1,21 @@
+power input, from left to right, looking into the pins are:
+5V, ground, 12V, -12V, NC?, 5V, GND, 12V, -12V
+
+ICs are labeled by their coordinate, number then letter (like "1J").
+Everything(?) else is labeled conventionally, Q1 is the first transistor,
+Y1 the first crystal, etc.
+
+the cpu sram derives its power from the +12V rail, through Q2.
+you can get the system to start by putting 5V onto that rail, and
+it'll work. to see if you're having that problem and/or if you've
+resolved it, check VCC on 1J, the 6264.
+
+if the SRAM isn't working (profoundly failed, not powered), the first
+read of SRAM will fail. that happens right after it tries to write to
+the video ASIC twice. you can spot those on the video ASIC's pin
+on the 74138 that decodes address space (2H). two low pulses, a delay
+(i think it was 100ms) and then the pulses again, forever.
+
+Y2 (12.288MHz crystal), Q3 (small BJT) and 6G (74LS390) generate the
+CPU clock, the clock for all of the CTC CLK inputs, and presumably the
+clock for the SIO baud rates, but i didn't track down that last one.

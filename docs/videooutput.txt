@@ -1,0 +1,21 @@
+Looking toward the pins of the video connector, they are, from left to right:
+
+ground, hsync, ***, video, vsync, ground
+
+the "***" pin isn't present in the cable, but i think on the pcb it
+goes over towards the audio circuitry.
+
+vsync and hsync are 5V active high logic level signals.
+
+video is 50ohm output impedance. it ranges from 0V to 2.7V, with an
+intermediate level of 2.05V or so in the front/back porch.  not yet
+sure if the pixels are active high or low, the terminal might have
+been in an inverted mode when i was looking at it.
+
+70Hz vertical refresh, somewhere in the vicinity of 33kHz horizontal
+refresh. i didn't measure it precisely.
+
+output amplifier is a 2N2369A (Q1). input signal goes to the
+base. collector is connected to 5V, emitter is connected to the output
+pin through a 47 ohm resistor, and pulled to ground through a 270 ohm
+resistor.
