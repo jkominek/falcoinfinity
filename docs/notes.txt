@@ -1,5 +1,6 @@
 power input, from left to right, looking into the pins are:
 5V, ground, 12V, -12V, NC?, 5V, GND, 12V, -12V
+pins are spaced 2.50mm.
 
 ICs are labeled by their coordinate, number then letter (like "1J").
 Everything(?) else is labeled conventionally, Q1 is the first transistor,
@@ -19,3 +20,6 @@ on the 74138 that decodes address space (2H). two low pulses, a delay
 Y2 (12.288MHz crystal), Q3 (small BJT) and 6G (74LS390) generate the
 CPU clock, the clock for all of the CTC CLK inputs, and presumably the
 clock for the SIO baud rates, but i didn't track down that last one.
+
+video asic also handles the keyboard. i can't figure out the electrical
+path to save my life, though.

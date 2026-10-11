@@ -1,0 +1,124 @@
+scan_hex,scan_dec,region,key_name,key_id_confidence,normal_hex,normal_display,shifted_hex,shifted_display,control_hex,control_display,rom0_physical_offset,bank1_cpu_address,observed_by_scope
+00,0,pre-number/function-region,,unknown physical key,86,<0x86>,86,<0x86>,86,<0x86>,5358,9358,no
+01,1,pre-number/function-region,F1,strong: internal F1-F16 sequence,BA,<0xBA>,BA,<0xBA>,F3,<0xF3>,535B,935B,no
+02,2,pre-number/function-region,F2,strong: internal F1-F16 sequence,BB,<0xBB>,BB,<0xBB>,92,<0x92>,535E,935E,no
+03,3,pre-number/function-region,,unknown physical key,E8,<0xE8>,EF,<0xEF>,86,<0x86>,5361,9361,no
+04,4,pre-number/function-region,F3,strong: internal F1-F16 sequence,BC,<0xBC>,BC,<0xBC>,93,<0x93>,5364,9364,no
+05,5,pre-number/function-region,F4,strong: internal F1-F16 sequence,BD,<0xBD>,BD,<0xBD>,94,<0x94>,5367,9367,no
+06,6,pre-number/function-region,F5,strong: internal F1-F16 sequence,BE,<0xBE>,BE,<0xBE>,95,<0x95>,536A,936A,no
+07,7,pre-number/function-region,,unknown physical key,F3,<0xF3>,96,<0x96>,86,<0x86>,536D,936D,no
+08,8,pre-number/function-region,F6,strong: internal F1-F16 sequence,BF,<0xBF>,BF,<0xBF>,96,<0x96>,5370,9370,no
+09,9,pre-number/function-region,F7,strong: internal F1-F16 sequence,C0,<0xC0>,C0,<0xC0>,97,<0x97>,5373,9373,no
+0A,10,pre-number/function-region,F8,strong: internal F1-F16 sequence,C1,<0xC1>,C1,<0xC1>,98,<0x98>,5376,9376,no
+0B,11,pre-number/function-region,F9,strong: internal F1-F16 sequence,C2,<0xC2>,C2,<0xC2>,86,<0x86>,5379,9379,no
+0C,12,pre-number/function-region,F10,strong: internal F1-F16 sequence,C3,<0xC3>,C3,<0xC3>,86,<0x86>,537C,937C,no
+0D,13,pre-number/function-region,F11,strong: internal F1-F16 sequence,C4,<0xC4>,C4,<0xC4>,86,<0x86>,537F,937F,no
+0E,14,pre-number/function-region,F12,strong: internal F1-F16 sequence,C5,<0xC5>,C5,<0xC5>,86,<0x86>,5382,9382,no
+0F,15,pre-number/function-region,F13,strong: internal F1-F16 sequence,C6,<0xC6>,C6,<0xC6>,86,<0x86>,5385,9385,no
+10,16,pre-number/function-region,F14,strong: internal F1-F16 sequence,C7,<0xC7>,C7,<0xC7>,86,<0x86>,5388,9388,no
+11,17,pre-number/function-region,F15,strong: internal F1-F16 sequence,C8,<0xC8>,C8,<0xC8>,89,<0x89>,538B,938B,no
+12,18,pre-number/function-region,,unknown physical key,DE,<0xDE>,DE,<0xDE>,86,<0x86>,538E,938E,no
+13,19,pre-number/function-region,F16,strong: internal F1-F16 sequence,C9,<0xC9>,C9,<0xC9>,91,<0x91>,5391,9391,no
+14,20,pre-number/function-region,,unknown physical key,E7,<0xE7>,ED,<0xED>,86,<0x86>,5394,9394,no
+15,21,pre-number/function-region,,unknown physical key,E7,<0xE7>,E8,<0xE8>,9B,<0x9B>,5397,9397,no
+16,22,pre-number/function-region,Scroll Lock (candidate),tentative: PC comparison / positional,8B,<0x8B>,8B,<0x8B>,86,<0x86>,539A,939A,no
+17,23,pre-number/function-region,,unknown physical key,9E,<0x9E>,89,<0x89>,90,<0x90>,539D,939D,no
+18,24,pre-number/function-region,,unknown physical key,8A,<0x8A>,8A,<0x8A>,F7,<0xF7>,53A0,93A0,no
+19,25,pre-number/function-region,,unknown physical key,DF,<0xDF>,DF,<0xDF>,86,<0x86>,53A3,93A3,no
+1A,26,number-region,Backtick / `,measured + ROM,60,`,7E,~,FF,<0xFF>,53A6,93A6,yes
+1B,27,number-region,1,measured + ROM,31,1,21,!,FF,<0xFF>,53A9,93A9,yes
+1C,28,number-region,2,ROM + PC comparison / characters,32,2,40,@,FF,<0xFF>,53AC,93AC,no
+1D,29,number-region,3,ROM + PC comparison / characters,33,3,23,#,FF,<0xFF>,53AF,93AF,no
+1E,30,number-region,4,ROM + PC comparison / characters,34,4,24,$,FF,<0xFF>,53B2,93B2,no
+1F,31,number-region,5,ROM + PC comparison / characters,35,5,25,%,FF,<0xFF>,53B5,93B5,no
+20,32,number-region,6,ROM + PC comparison / characters,36,6,5E,^,FF,<0xFF>,53B8,93B8,no
+21,33,number-region,7,ROM + PC comparison / characters,37,7,26,&,FF,<0xFF>,53BB,93BB,no
+22,34,number-region,8,ROM + PC comparison / characters,38,8,2A,*,FF,<0xFF>,53BE,93BE,no
+23,35,number-region,9,measured + ROM,39,9,28,(,FF,<0xFF>,53C1,93C1,yes
+24,36,number-region,0,ROM + PC comparison / characters,30,0,29,),FF,<0xFF>,53C4,93C4,no
+25,37,number-region,Minus / -,ROM + PC comparison / characters,2D,-,5F,_,FF,<0xFF>,53C7,93C7,no
+26,38,number-region,Equals / =,ROM + PC comparison / characters,3D,=,2B,+,FF,<0xFF>,53CA,93CA,no
+27,39,number-region,Backspace (candidate),tentative: PC comparison / positional,EC,<0xEC>,7F,DEL (0x7F),1F,<0x1F>,53CD,93CD,no
+28,40,number-region,,unknown physical key,DA,<0xDA>,E0,<0xE0>,86,<0x86>,53D0,93D0,no
+29,41,number-region,,unknown physical key,DB,<0xDB>,DB,<0xDB>,86,<0x86>,53D3,93D3,no
+2A,42,number-region,,unknown physical key,DC,<0xDC>,E1,<0xE1>,86,<0x86>,53D6,93D6,no
+2B,43,number-region,,unknown physical key,D3,<0xD3>,D7,<0xD7>,86,<0x86>,53D9,93D9,no
+2C,44,number-region,,unknown physical key,D4,<0xD4>,D8,<0xD8>,86,<0x86>,53DC,93DC,no
+2D,45,number-region,,unknown physical key,D5,<0xD5>,D9,<0xD9>,86,<0x86>,53DF,93DF,no
+2E,46,number-region,Escape,measured + ROM,99,<0x99>,9A,<0x9A>,86,<0x86>,53E2,93E2,yes
+2F,47,QWERTY-region,Tab,measured + ROM,E9,<0xE9>,EA,<0xEA>,86,<0x86>,53E5,93E5,yes
+30,48,QWERTY-region,Q,measured + ROM,71,q,51,Q,FF,<0xFF>,53E8,93E8,yes
+31,49,QWERTY-region,W,ROM + PC comparison / characters,77,w,57,W,FF,<0xFF>,53EB,93EB,no
+32,50,QWERTY-region,E,ROM + PC comparison / characters,65,e,45,E,FF,<0xFF>,53EE,93EE,no
+33,51,QWERTY-region,R,ROM + PC comparison / characters,72,r,52,R,FF,<0xFF>,53F1,93F1,no
+34,52,QWERTY-region,T,ROM + PC comparison / characters,74,t,54,T,FF,<0xFF>,53F4,93F4,no
+35,53,QWERTY-region,Y,ROM + PC comparison / characters,79,y,59,Y,FF,<0xFF>,53F7,93F7,no
+36,54,QWERTY-region,U,ROM + PC comparison / characters,75,u,55,U,FF,<0xFF>,53FA,93FA,no
+37,55,QWERTY-region,I,ROM + PC comparison / characters,69,i,49,I,FF,<0xFF>,53FD,93FD,no
+38,56,QWERTY-region,O,ROM + PC comparison / characters,6F,o,4F,O,FF,<0xFF>,5400,9400,no
+39,57,QWERTY-region,P,ROM + PC comparison / characters,70,p,50,P,FF,<0xFF>,5403,9403,no
+3A,58,QWERTY-region,[,ROM + PC comparison / characters,5B,[,7B,{,FF,<0xFF>,5406,9406,no
+3B,59,QWERTY-region,],ROM + PC comparison / characters,5D,],7D,},FF,<0xFF>,5409,9409,no
+3C,60,QWERTY-region,Return / Enter,ROM + PC comparison / characters,E3,<0xE3>,E3,<0xE3>,0D,<0x0D>,540C,940C,no
+3D,61,QWERTY-region,,unknown physical key,DD,<0xDD>,E2,<0xE2>,86,<0x86>,540F,940F,no
+3E,62,QWERTY-region,,unknown physical key,DE,<0xDE>,DE,<0xDE>,86,<0x86>,5412,9412,no
+3F,63,QWERTY-region,,unknown physical key,DF,<0xDF>,DF,<0xDF>,86,<0x86>,5415,9415,no
+40,64,QWERTY-region,,unknown physical key,A0,<0xA0>,A0,<0xA0>,86,<0x86>,5418,9418,no
+41,65,QWERTY-region,,unknown physical key,A0,<0xA0>,A0,<0xA0>,86,<0x86>,541B,941B,no
+42,66,QWERTY-region,,unknown physical key,A0,<0xA0>,A0,<0xA0>,86,<0x86>,541E,941E,no
+43,67,QWERTY-region,Left Ctrl,measured + ROM,80,<0x80>,80,<0x80>,80,<0x80>,5421,9421,yes
+44,68,home-region,Caps Lock,measured + ROM,87,<0x87>,87,<0x87>,9C,<0x9C>,5424,9424,yes
+45,69,home-region,A,measured + ROM,61,a,41,A,FF,<0xFF>,5427,9427,yes
+46,70,home-region,S,ROM + PC comparison / characters,73,s,53,S,FF,<0xFF>,542A,942A,no
+47,71,home-region,D,ROM + PC comparison / characters,64,d,44,D,FF,<0xFF>,542D,942D,no
+48,72,home-region,F,ROM + PC comparison / characters,66,f,46,F,FF,<0xFF>,5430,9430,no
+49,73,home-region,G,ROM + PC comparison / characters,67,g,47,G,FF,<0xFF>,5433,9433,no
+4A,74,home-region,H,ROM + PC comparison / characters,68,h,48,H,FF,<0xFF>,5436,9436,no
+4B,75,home-region,J,ROM + PC comparison / characters,6A,j,4A,J,FF,<0xFF>,5439,9439,no
+4C,76,home-region,K,measured + ROM,6B,k,4B,K,FF,<0xFF>,543C,943C,yes
+4D,77,home-region,L,ROM + PC comparison / characters,6C,l,4C,L,FF,<0xFF>,543F,943F,no
+4E,78,home-region,;,ROM + PC comparison / characters,3B,;,3A,:,FF,<0xFF>,5442,9442,no
+4F,79,home-region,',ROM + PC comparison / characters,27,',22,"""",FF,<0xFF>,5445,9445,no
+50,80,home-region,\,ROM + PC comparison / characters,5C,\,7C,|,FF,<0xFF>,5448,9448,no
+51,81,home-region,,unknown physical key,D2,<0xD2>,DA,<0xDA>,E0,<0xE0>,544B,944B,no
+52,82,home-region,,unknown physical key,D3,<0xD3>,DD,<0xDD>,E2,<0xE2>,544E,944E,no
+53,83,home-region,,unknown physical key,CA,<0xCA>,CE,<0xCE>,8C,<0x8C>,5451,9451,no
+54,84,home-region,,unknown physical key,D4,<0xD4>,DC,<0xDC>,D8,<0xD8>,5454,9454,no
+55,85,home-region,,unknown physical key,A0,<0xA0>,A0,<0xA0>,86,<0x86>,5457,9457,no
+56,86,home-region,,unknown physical key,A0,<0xA0>,A0,<0xA0>,86,<0x86>,545A,945A,no
+57,87,home-region,Keypad comma,measured + ROM,A0,<0xA0>,A0,<0xA0>,86,<0x86>,545D,945D,yes
+58,88,home-region,,unknown physical key,D5,<0xD5>,DB,<0xDB>,E1,<0xE1>,5460,9460,no
+59,89,bottom-region,Left Shift,measured + ROM,82,<0x82>,82,<0x82>,82,<0x82>,5463,9463,yes
+5A,90,bottom-region,< > (extra/ISO position),ROM + PC comparison / characters,3C,<,3E,>,FF,<0xFF>,5466,9466,no
+5B,91,bottom-region,Z,ROM + PC comparison / characters,7A,z,5A,Z,FF,<0xFF>,5469,9469,no
+5C,92,bottom-region,X,measured + ROM,78,x,58,X,FF,<0xFF>,546C,946C,yes
+5D,93,bottom-region,C,ROM + PC comparison / characters,63,c,43,C,FF,<0xFF>,546F,946F,no
+5E,94,bottom-region,V,ROM + PC comparison / characters,76,v,56,V,FF,<0xFF>,5472,9472,no
+5F,95,bottom-region,B,ROM + PC comparison / characters,62,b,42,B,FF,<0xFF>,5475,9475,no
+60,96,bottom-region,N,ROM + PC comparison / characters,6E,n,4E,N,FF,<0xFF>,5478,9478,no
+61,97,bottom-region,M,ROM + PC comparison / characters,6D,m,4D,M,FF,<0xFF>,547B,947B,no
+62,98,bottom-region,"Comma, unchanged by Shift",ROM + PC comparison / characters,2C,",",2C,",",FF,<0xFF>,547E,947E,no
+63,99,bottom-region,"Period, unchanged by Shift",ROM + PC comparison / characters,2E,.,2E,.,FF,<0xFF>,5481,9481,no
+64,100,bottom-region,Slash / ?,ROM + PC comparison / characters,2F,/,3F,?,FF,<0xFF>,5484,9484,no
+65,101,bottom-region,Right Shift,ROM + PC comparison / characters,83,<0x83>,83,<0x83>,83,<0x83>,5487,9487,no
+66,102,bottom-region,Period / >,ROM + PC comparison / characters,2E,.,3E,>,FF,<0xFF>,548A,948A,no
+67,103,bottom-region,,unknown physical key,CB,<0xCB>,CF,<0xCF>,8D,<0x8D>,548D,948D,no
+68,104,bottom-region,,unknown physical key,CC,<0xCC>,D0,<0xD0>,8E,<0x8E>,5490,9490,no
+69,105,bottom-region,,unknown physical key,A0,<0xA0>,A0,<0xA0>,86,<0x86>,5493,9493,no
+6A,106,bottom-region,,unknown physical key,A0,<0xA0>,A0,<0xA0>,86,<0x86>,5496,9496,no
+6B,107,bottom-region,,unknown physical key,A0,<0xA0>,E4,<0xE4>,86,<0x86>,5499,9499,no
+6C,108,bottom-region,Comma / <,ROM + PC comparison / characters,2C,",",3C,<,FF,<0xFF>,549C,949C,no
+6D,109,bottom-region,,unknown physical key,E6,<0xE6>,E6,<0xE6>,86,<0x86>,549F,949F,no
+6E,110,extra-region,Alt,ROM + PC comparison / characters,84,<0x84>,84,<0x84>,84,<0x84>,54A2,94A2,no
+6F,111,extra-region,Space,ROM + PC comparison / characters,20, ,20, ,FF,<0xFF>,54A5,94A5,no
+70,112,extra-region,,unknown physical key,EB,<0xEB>,08,<0x08>,86,<0x86>,54A8,94A8,no
+71,113,extra-region,,unknown physical key,F1,<0xF1>,E6,<0xE6>,86,<0x86>,54AB,94AB,no
+72,114,extra-region,,unknown physical key,A0,<0xA0>,A0,<0xA0>,86,<0x86>,54AE,94AE,no
+73,115,extra-region,,unknown physical key,A0,<0xA0>,A0,<0xA0>,86,<0x86>,54B1,94B1,no
+74,116,extra-region,,unknown physical key,CD,<0xCD>,D1,<0xD1>,8F,<0x8F>,54B4,94B4,no
+75,117,extra-region,,unknown physical key,A0,<0xA0>,A0,<0xA0>,86,<0x86>,54B7,94B7,no
+76,118,extra-region,,unknown physical key,A0,<0xA0>,A0,<0xA0>,86,<0x86>,54BA,94BA,no
+77,119,extra-region,,unknown physical key,A0,<0xA0>,A0,<0xA0>,86,<0x86>,54BD,94BD,no
+78,120,extra-region,,unknown physical key,D2,<0xD2>,D6,<0xD6>,86,<0x86>,54C0,94C0,no
+79,121,extra-region,Backtick / ` (alternate position),ROM + PC comparison / characters,60,`,7E,~,FF,<0xFF>,54C3,94C3,no
+7A,122,extra-region,Backslash (alternate position),ROM + PC comparison / characters,5C,\,7C,|,FF,<0xFF>,54C6,94C6,no

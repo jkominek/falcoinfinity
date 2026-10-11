@@ -1,6 +1,6 @@
 Looking toward the pins of the video connector, they are, from left to right:
-
 ground, hsync, ***, video, vsync, ground
+pins are spaced 2.50mm.
 
 the "***" pin isn't present in the cable, but i think on the pcb it
 goes over towards the audio circuitry.
