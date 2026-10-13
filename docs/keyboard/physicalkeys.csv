@@ -1,0 +1,6 @@
+row0,Ctrl,,Funct,,Space Bar,,Delete,, Line Feed,,Left Arrow,Down Arrow,Right Arrow,,numpad 0,numpad .,numpad Enter
+row1,Shift,Z,X,C,V,B,N,M,<comma,>period,?/,Shift,,Up Arrow,,numpad 1,numpad 2,numpad 3,numpad Enter
+row2,Caps Lock,A,S,D,F,G,H,J,K,L,:;,doublequote comma,Return,,numpad 4,numpad 5,numpad 6,numpad comma
+row3,Tab,Q,W,E,R,T,Y,U,I,O,P,{[,}],|backslash,,Send,Home,Next Page,,numpad 7,numpad 8,numpad 9,numpad -
+row4,~`,!1,@2,#3,$4,%5,^6,&7,*8,(9,)0,_-,+=,Back Space,,Print,,Window,,Prev Page,,LIne Ins Char, Line Del Char,Scrn Clr Line,Ins Repl
+row5,Esc,,F1,F2,F3,F4,,F5,F6,F7,F8,,F9,F10,F11,F12,,Hold Scrn,Setup,Break,,F13,F14,F15,F16

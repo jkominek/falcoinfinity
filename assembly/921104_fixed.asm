@@ -5,83 +5,22 @@
 
 	ld sp,0cc65h
 	jp 000f2h
-	ccf	
-	dec b	
-	rst 38h	
-	rst 38h	
-	rst 38h	
-	rst 38h	
-	rst 38h	
-	rst 38h	
-	rst 38h	
-	rst 38h	
-	jr c,$+2
-	jr c,$+2
-	jr c,$+2
-	jr c,$+2
-	ld (bc),a	
-	add hl,bc	
-	ccf	
-	add hl,bc	
-	ld hl,04209h
-	add hl,bc	
-	ld d,028h
-	ld h,e	
-	add hl,hl	
-	jr nz,$+51
-	add hl,sp	
-	add hl,sp	
-	ld sp,04620h
-	ld b,h	
-	ld d,b	
-	inc l	
-	jr nz,$+75
-	ld l,(hl)	
-	ld h,e	
-	jr nz,$+81
-	scf	
-	inc sp	
-	ld sp,0c3ffh
-	push hl	
-	ld a,0ffh
-	rst 38h	
-	rst 38h	
-	rst 38h	
-	rst 38h	
-	dec c	
-	ex af,af'	
-	ld c,d	
-	ex af,af'	
-	inc l	
-	ex af,af'	
-	ld c,l	
-	ex af,af'	
-	jr $+9
-	ld d,l	
-	rlca	
-	scf	
-	rlca	
-	ld e,b	
-	rlca	
-	jr c,$+2
-	jr c,$+2
-	jr c,$+2
-	jp (hl)	
-	inc bc	
-	rst 38h	
-	rst 38h	
-	rst 38h	
-	rst 38h	
-	rst 38h	
-	rst 38h	
-	rst 38h	
-	rst 38h	
-	rst 38h	
-	rst 38h	
-	rst 38h	
-	rst 38h	
-	rst 38h	
-	rst 38h	
+
+; ROM identification/header fields and pointer records (data, not code).
+	defb 03fh,005h,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	defb 038h,000h,038h,000h,038h,000h,038h,000h
+	defw 0902h,093fh,0921h,0942h
+	defb 016h,028h,063h,029h,020h,031h,039h,039h,031h,020h,046h,044h
+	defb 050h,02ch,020h,049h,06eh,063h,020h,04fh,037h,033h,031h,0ffh
+	jp 03ee5h
+
+; Interrupt dispatch table and unused/reset vector slots.
+	defs 5,0ffh
+	defw 080dh,084ah,082ch,084dh,0718h,0755h,0737h,0758h
+	defb 038h,000h,038h,000h,038h,000h,0e9h,003h
+	defs 14,0ffh
+
+video_interrupt_handler:
 	push af	
 	push hl	
 	in a,(051h)
@@ -106,6 +45,9 @@
 	pop hl	
 	pop af	
 	retn
+
+; ASIC status/raster interrupt path.
+video_status_wait:
 	ld a,00eh
 	out (059h),a
 	jr $-12
@@ -143,6 +85,9 @@
 	pop hl	
 	pop af	
 	retn
+
+; Restore the cursor and display-list registers from the active record.
+restore_video_display_state:
 	ld hl,0c659h
 	ld a,(hl)	
 	out (05dh),a
@@ -157,6 +102,10 @@
 	ld a,(0c361h)
 	out (057h),a
 	ret	
+
+; Reset entry: establish stack/IM2 state, clear working RAM, detect memory,
+; then initialize the ASIC and board peripherals.
+reset_entry:
 	di	
 	ld a,004h
 	ld c,0fah
@@ -166,7 +115,7 @@
 	jr nz,$-5
 	dec a	
 	jr nz,$-10
-	call 00285h
+	call reset_video_asic
 	di	
 	call 072eeh
 	ld sp,0cc65h
@@ -177,11 +126,11 @@
 	im 2
 	ld hl,0c04ch
 	ld de,0c000h
-	call 0755ah
+	call clear_memory_range
 	ld hl,0c35fh
 	ld de,0c121h
-	call 0755ah
-	call 003c7h
+	call clear_memory_range
+	call initialize_board_io
 	call 03430h
 	call 0741eh
 	call 0051fh
@@ -189,32 +138,36 @@
 	call 00b0dh
 	call 072e2h
 	ei	
-	call 002d9h
+	call reset_keyboard_interface
 	set 7,(iy-07fh)
 	call 005bch
 	call 00588h
 	jp 00b23h
+
+check_initialization_status:
 	ld a,(0c001h)
 	bit 0,a
 	ret	
+
+detect_ram_configuration:
 	ld a,(0c363h)
 	push af	
 	ld a,004h
-	call 00220h
+	call select_test_bank
 	jr nz,$+20
 	ld a,005h
-	call 00220h
+	call select_test_bank
 	jr nz,$+13
 	ld hl,08000h
 	ld de,00000h
-	call 00228h
+	call compare_ram_window
 	jr z,$+6
 	set 0,(iy-07ah)
 	ld a,002h
-	call 00220h
+	call select_test_bank
 	jr nz,$+9
 	ld a,003h
-	call 00220h
+	call select_test_bank
 	jr z,$+6
 	set 1,(iy-07ah)
 	call 03f39h
@@ -283,21 +236,29 @@
 	call 0340bh
 	pop af	
 	jp 00656h
+
+select_test_bank:
 	out (000h),a
 	ld hl,0c000h
 	ld de,08000h
+
+compare_ram_window:
 	or a	
 	sbc hl,de
 	ld b,h	
 	ld c,l	
 	ex de,hl	
 	jp 03acdh
+
+check_ram_diagnostic_flags:
 	ld a,(0c006h)
 	or a	
 	ret nz	
 	ld a,(0c007h)
 	or a	
 	ret	
+
+initialize_ctc:
 	ld a,003h
 	out (070h),a
 	out (071h),a
@@ -333,6 +294,8 @@
 	ld c,091h
 	ld hl,0c00bh
 	jr $-37
+
+reset_video_asic:
 	ld a,07fh
 	out (05bh),a
 	out (05bh),a
@@ -375,6 +338,8 @@
 	ld a,00ch
 	out (059h),a
 	ret	
+
+reset_keyboard_interface:
 	ld a,00fh
 	out (05bh),a
 	ld a,00fh
@@ -495,6 +460,8 @@
 	ld a,0a8h
 	ld (0c06eh),a
 	ret	
+
+initialize_board_io:
 	ld hl,07ecch
 	ld (0c366h),hl
 	call 0058eh
@@ -507,6 +474,10 @@
 	call 0065ch
 	call 00391h
 	ret	
+
+; IM2 trampoline saves the interrupted context, then returns through the
+; service body at 03feh with the firmware's work-area pointer installed.
+interrupt_context_stub:
 	push af	
 	ld a,003h
 	out (073h),a
@@ -519,6 +490,8 @@
 	push hl	
 	ei	
 	reti
+
+interrupt_service_body:
 	ld a,(0c00ch)
 	push af	
 	ld a,(0c363h)
@@ -2805,6 +2778,7 @@
 	ld hl,078a1h
 	ld (iy+03eh),003h
 	jr $-71
+
 	sub a	
 	scf	
 	ret	
@@ -15196,6 +15170,8 @@
 	ld b,h	
 	ld c,l	
 	ret	
+
+clear_memory_range:
 	sub a	
 	scf	
 	sbc hl,de
@@ -15204,7 +15180,7 @@
 	ld b,h	
 	ld c,l	
 	ex de,hl	
-	jp 077dah
+	jp zero_fill_range
 	pop de	
 	push ix
 	pop hl	
@@ -15620,7 +15596,9 @@
 	inc hl	
 	djnz $-2
 	ret	
+
 	sub a	
+zero_fill_range:
 	ld (hl),a	
 	ld d,h	
 	ld e,l	

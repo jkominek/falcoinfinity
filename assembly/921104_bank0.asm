@@ -3,25 +3,27 @@
 
 	org	08000h
 
+; Probe screen RAM banking and ASIC option bits during board startup.
+detect_board_memory_and_asic:
 	set 4,(iy-07bh)
 	ld hl,0e000h
 	ld de,00080h
-	call 08082h
+	call test_screen_ram
 	jr z,$+18
 	ld de,00020h
-	call 08082h
+	call test_screen_ram
 	jr z,$+6
 	ld a,000h
 	jr $+4
 	ld a,002h
 	jr $+28
 	ld de,00020h
-	call 08082h
+	call test_screen_ram
 	jr z,$+6
 	ld a,001h
 	jr $+16
 	ld de,080a0h
-	call 08082h
+	call test_screen_ram
 	jr z,$+6
 	ld a,001h
 	jr $+4
@@ -42,15 +44,16 @@
 	ld a,018h
 	out (08bh),a
 	ld c,050h
-	call 08072h
+	call read_asic_register
 	cp 050h
 	jr nz,$+15
 	ld c,0a1h
-	call 08072h
+	call read_asic_register
 	cp 0a1h
 	jr nz,$+6
 	set 3,(iy-07bh)
 	ret	
+read_asic_register:
 	ld a,002h
 	out (08bh),a
 	ld a,c	
@@ -60,6 +63,7 @@
 	in a,(08bh)
 	and 0f1h
 	ret	
+test_screen_ram:
 	ld c,052h
 	out (c),d
 	ld (hl),055h
@@ -74,16 +78,19 @@
 	cp 0aah
 	ld a,000h
 	ret	
+
+initialize_video_parameters:
 	sub a	
 	out (058h),a
 	ld a,010h
 	call 0340bh
-	call 080b0h
+	call program_video_window
 	out (030h),a
-	call 080b0h
+	call program_video_window
 	ld a,00ah
 	out (059h),a
 	ret	
+program_video_window:
 	ld a,04fh
 	out (05bh),a
 	ld a,001h
@@ -104,6 +111,7 @@
 	ld a,037h
 	out (05fh),a
 	ret	
+probe_serial_and_asic_state:
 	ld a,011h
 	out (063h),a
 	ld a,016h
@@ -127,6 +135,8 @@
 	in a,(089h)
 	ld (0c02bh),a
 	ret	
+
+initialize_terminal_tables:
 	call 085f2h
 	ld hl,0c934h
 	ld a,000h

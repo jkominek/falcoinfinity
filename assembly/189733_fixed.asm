@@ -4,86 +4,23 @@
 	org	00000h
 
 	ld sp,0cc66h
-	jp 000f2h
-	ld b,h	
-	dec b	
-	rst 38h	
-	rst 38h	
-	rst 38h	
-	rst 38h	
-	rst 38h	
-	rst 38h	
-	rst 38h	
-	rst 38h	
-	jr c,$+2
-	jr c,$+2
-	jr c,$+2
-	jr c,$+2
-	ld b,a	
-	add hl,bc	
-	add a,h	
-	add hl,bc	
-	ld h,(hl)	
-	add hl,bc	
-	add a,a	
-	add hl,bc	
-	ld d,028h
-	ld h,e	
-	add hl,hl	
-	jr nz,$+51
-	add hl,sp	
-	add hl,sp	
-	ld (04620h),a
-	ld b,h	
-	ld d,b	
-	inc l	
-	jr nz,$+75
-	ld l,(hl)	
-	ld h,e	
-	jr nz,$+81
-	scf	
-	inc sp	
-	inc sp	
-	rst 38h	
+	jp reset_entry
+
+; ROM identification, short dispatch entries and pointer records (data, not code).
+	defb 044h,005h,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh
+	defb 038h,000h,038h,000h,038h,000h,038h,000h
+	defw 0947h,0984h,0966h,0987h
+	defb 016h,028h,063h,029h,020h,031h,039h,039h,032h,020h,046h,044h
+	defb 050h,02ch,020h,049h,06eh,063h,020h,04fh,037h,033h,033h,0ffh
 	jp 03dceh
-	rst 38h	
-	rst 38h	
-	rst 38h	
-	rst 38h	
-	rst 38h	
-	ld d,d	
-	ex af,af'	
-	adc a,a	
-	ex af,af'	
-	ld (hl),c	
-	ex af,af'	
-	sub d	
-	ex af,af'	
-	ld e,l	
-	rlca	
-	sbc a,d	
-	rlca	
-	ld a,h	
-	rlca	
-	sbc a,l	
-	rlca	
-	jr c,$+2
-	jr c,$+2
-	jr c,$+2
-	jp m,0ff03h
-	rst 38h	
-	rst 38h	
-	rst 38h	
-	rst 38h	
-	rst 38h	
-	rst 38h	
-	rst 38h	
-	rst 38h	
-	rst 38h	
-	rst 38h	
-	rst 38h	
-	rst 38h	
-	rst 38h	
+
+; Interrupt dispatch table and unused/reset vector slots.
+	defs 5,0ffh
+	defw 0852h,088fh,0871h,0892h,075dh,079ah,077ch,079dh
+	defb 038h,000h,038h,000h,038h,000h,0fah,003h
+	defs 14,0ffh
+
+video_interrupt_handler:
 	push af	
 	push hl	
 	in a,(051h)
@@ -108,6 +45,10 @@
 	pop hl	
 	pop af	
 	retn
+
+; Second ASIC interrupt path: wait for the programmed raster condition,
+; acknowledge it and restore the pending cursor/display registers.
+video_status_wait:
 	ld a,00eh
 	out (059h),a
 	jr $-12
@@ -145,6 +86,9 @@
 	pop hl	
 	pop af	
 	retn
+
+; Restore the cursor and display-list registers from the active record.
+restore_video_display_state:
 	ld hl,0c65ah
 	ld a,(hl)	
 	out (05dh),a
@@ -159,6 +103,10 @@
 	ld a,(0c362h)
 	out (057h),a
 	ret	
+
+; Reset entry.  Initialize the stack and IM2 vectors, clear working RAM,
+; detect memory, and bring up the ASIC and board peripherals.
+reset_entry:
 	di	
 	ld a,004h
 	ld c,0fah
@@ -168,7 +116,7 @@
 	jr nz,$-5
 	dec a	
 	jr nz,$-10
-	call 00296h
+	call reset_video_asic
 	di	
 	call 0718eh
 	ld sp,0cc66h
@@ -179,11 +127,11 @@
 	im 2
 	ld hl,0c04ch
 	ld de,0c000h
-	call 073fah
+	call clear_memory_range
 	ld hl,0c360h
 	ld de,0c122h
-	call 073fah
-	call 003d8h
+	call clear_memory_range
+	call initialize_board_io
 	call 03319h
 	call 072beh
 	call 00530h
@@ -191,39 +139,43 @@
 	call 009e8h
 	call 07182h
 	ei	
-	call 002eah
+	call reset_keyboard_interface
 	set 7,(iy-07fh)
 	call 005cdh
 	call 00599h
 	call 006a5h
 	jp 009feh
+
+check_initialization_status:
 	ld a,(0c001h)
 	bit 0,a
 	ret	
+
+detect_ram_configuration:
 	ld a,(0c364h)
 	push af	
 	ld a,004h
-	call 00231h
+	call select_test_bank
 	jr nz,$+20
 	ld a,005h
-	call 00231h
+	call select_test_bank
 	jr nz,$+13
 	ld hl,08000h
 	ld de,00000h
-	call 00239h
+	call compare_ram_window
 	jr z,$+6
 	set 0,(iy-07ah)
 	ld a,000h
-	call 00231h
+	call select_test_bank
 	jr nz,$+23
 	ld a,001h
-	call 00231h
+	call select_test_bank
 	jr nz,$+16
 	ld a,002h
-	call 00231h
+	call select_test_bank
 	jr nz,$+9
 	ld a,003h
-	call 00231h
+	call select_test_bank
 	jr z,$+6
 	set 1,(iy-07ah)
 	call 03e22h
@@ -292,21 +244,29 @@
 	call 032f4h
 	pop af	
 	jp 00667h
+
+select_test_bank:
 	out (000h),a
 	ld hl,0c000h
 	ld de,08000h
+
+compare_ram_window:
 	or a	
 	sbc hl,de
 	ld b,h	
 	ld c,l	
 	ex de,hl	
 	jp 039b6h
+
+check_ram_diagnostic_flags:
 	ld a,(0c006h)
 	or a	
 	ret nz	
 	ld a,(0c007h)
 	or a	
 	ret	
+
+initialize_ctc:
 	ld a,003h
 	out (070h),a
 	out (071h),a
@@ -342,6 +302,8 @@
 	ld c,091h
 	ld hl,0c00bh
 	jr $-37
+
+reset_video_asic:
 	ld a,07fh
 	out (05bh),a
 	out (05bh),a
@@ -384,6 +346,8 @@
 	ld a,00ch
 	out (059h),a
 	ret	
+
+reset_keyboard_interface:
 	ld a,00fh
 	out (05bh),a
 	ld a,00fh
@@ -504,6 +468,8 @@
 	ld a,0a8h
 	ld (0c06eh),a
 	ret	
+
+initialize_board_io:
 	ld hl,07ecch
 	ld (0c367h),hl
 	call 0059fh
@@ -516,6 +482,10 @@
 	call 0066dh
 	call 003a2h
 	ret	
+
+; IM2 trampoline saves the interrupted context, then returns through the
+; service body at 040fh with the firmware's work-area pointer installed.
+interrupt_context_stub:
 	push af	
 	ld a,003h
 	out (073h),a
@@ -528,6 +498,8 @@
 	push hl	
 	ei	
 	reti
+
+interrupt_service_body:
 	ld a,(0c00ch)
 	push af	
 	ld a,(0c364h)
@@ -2669,6 +2641,7 @@
 	ld hl,07741h
 	ld (iy+03eh),003h
 	jr $-71
+
 	sub a	
 	scf	
 	ret	
@@ -15020,6 +14993,8 @@
 	ld b,h	
 	ld c,l	
 	ret	
+
+clear_memory_range:
 	sub a	
 	scf	
 	sbc hl,de
@@ -15028,7 +15003,7 @@
 	ld b,h	
 	ld c,l	
 	ex de,hl	
-	jp 0767ah
+	jp zero_fill_range
 	pop de	
 	push ix
 	pop hl	
@@ -15444,7 +15419,9 @@
 	inc hl	
 	djnz $-2
 	ret	
+
 	sub a	
+zero_fill_range:
 	ld (hl),a	
 	ld d,h	
 	ld e,l	
