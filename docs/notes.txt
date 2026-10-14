@@ -6,6 +6,8 @@ ICs are labeled by their coordinate, number then letter (like "1J").
 Everything(?) else is labeled conventionally, Q1 is the first transistor,
 Y1 the first crystal, etc.
 
+haven't checked them all, but all the screws i've checked have been M3.
+
 the cpu sram derives its power from the +12V rail, through Q2.
 you can get the system to start by putting 5V onto that rail, and
 it'll work. to see if you're having that problem and/or if you've

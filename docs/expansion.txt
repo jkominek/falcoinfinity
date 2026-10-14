@@ -1,0 +1,44 @@
+Looking at it with the RS-232 ports facing away from you, and the "J7"
+label upright.
+
+     +5V  +5V
+CTC TRG0  -12V
+     CLK  +12V
+     GND  GND
+      D0  SIO IEO
+      D1  INT
+      D2  RESET
+      D3  M1
+      D4  IORQ
+      D5  RD
+      D6  A0
+      D7  A1
+  /IOSel  A2
+      NC  +5V Battery
+     GND  GND
+      WR  A3
+    MREQ  A4
+    RFSH  A5
+   BUSAK  A6
+   BUSRQ  A7
+    WAIT  A8
+      NC  A9
+     A15  A10
+     A14  A11
+     A13  A12
+--------------
+J7
+
+
+/IOSel is Y1 on the 74138 that divides up IO address space.
+The expansion port corresponds to 0x10 to 0x1F.
+
+I don't see a way to participate in memory operations, but I
+believe you could use every mirror of the IO space allocated
+to the port. That would give you 8192 IO ports. You could also
+snoop memory reads/writes.
+
+Perhaps if you can turn off the video chip's VRAM aperture
+(0xE000-0xFFFF), so that it doesn't attempt to drive the data
+bus, then the expansion port could decode the region and
+respond.
