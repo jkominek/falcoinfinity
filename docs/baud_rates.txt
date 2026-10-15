@@ -1,0 +1,56 @@
+Falco Infinity serial baud-rate selection
+=========================================
+
+The setup menu offers these rates for each SIO channel. The firmware indexes
+the table with the selected baud option and writes the low byte to the CTC
+control port, followed by the high byte as the CTC time constant.
+
+  Baud       CTC control   Time constant
+  ---------  ------------  -------------
+  50         25h           1Eh
+  75         25h           14h
+  110        05h           DAh
+  134.5      05h           B2h
+  150        05h           A0h
+  300        05h           50h
+  600        05h           28h
+  1200       45h           40h
+  1800       45h           2Bh
+  2400       45h           20h
+  3600       45h           15h
+  4800       45h           10h
+  7200       45h           0Bh
+  9600       45h           08h
+  19200      45h           04h
+  38400      45h           02h
+
+CTC/SIO relationship
+--------------------
+
+The CTC channels provide the external receive and transmit clocks for the SIO
+channels. Firmware sets SIO WR4 to asynchronous mode with x16 clocking, so the
+CTC output clock is sixteen times the selected serial bit rate.
+
+The CTC runs from 6.144 MHz (12.288 MHz crystal divided by two). Control word
+25h selects timer mode with a /256 prescaler; 05h selects timer mode with a
+/16 prescaler. These settings produce the low rates using the CTC clock and
+the listed time constant. Control word 45h selects counter mode, where the CTC
+counts its external 1.2288 MHz input. The time constant then divides that
+input to produce the SIO clock. The channel 0 and 1 external inputs are each
+clocked at 1.2288 MHz in the MAME machine configuration.
+
+The listed constants are integer divisors, so a few nominal choices are
+approximate (for example, 1800 baud is about 1786 baud and 7200 baud is about
+6982 baud with the configured input clock). The 38400 setting uses counter
+constant 2, yielding 614.4 kHz for the SIO's x16 clock input and 38.4 kbaud
+on the line.
+
+Higher rates appear possible from the clocking alone. At the existing CTC
+constant 2, switching the SIO from x16 to x1 would give about 614.4 kbaud.
+Using counter constant 1 as well would give a theoretical 1.2288 Mbaud in x1
+mode. These are clock-derived limits, not evidence that the firmware, serial
+drivers (MC1488/MC1489), cabling, or attached equipment support those rates.
+
+Firmware annotations are in assembly/189733_fixed.asm and
+assembly/921104_fixed.asm, at the baud-clock selector/table and SIO WR4 setup.
+The CTC/SIO clock connections are configured in src/mame/falco/falco500.cpp.

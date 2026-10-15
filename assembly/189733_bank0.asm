@@ -4,6 +4,11 @@
 	org	08000h
 
 ; Probe screen RAM banking and ASIC option bits during board startup.
+; The 8 KiB CPU aperture at e000-ffff is selected through ASIC I/O port 52.
+; This initial probe compares bank values 00/80 and 20/a0 to detect
+; whether the selected pages retain independent data. A failed comparison
+; establishes aliasing or unusable backing, but cannot distinguish an alias
+; from an unpopulated page returning an undriven bus by itself.
 detect_board_memory_and_asic:
 	set 4,(iy-07bh)
 	ld hl,0e000h
@@ -64,6 +69,8 @@ read_asic_register:
 	and 0f1h
 	ret	
 test_screen_ram:
+	; C=52 selects the CPU-visible screen-RAM page; D and E are the
+	; candidate page values supplied by detect_board_memory_and_asic.
 	ld c,052h
 	out (c),d
 	ld (hl),055h
@@ -2040,6 +2047,9 @@ initialize_terminal_tables:
 	ld de,0fff6h
 	add hl,de	
 	ld de,0c921h
+	; Compare the eight enabled alarm fields against the current clock/date
+	; shadow.  The caller passes alarm records at C933 or C93E; mask bits mark
+	; fields that participate, while zero fields are treated as don't-care.
 	ld b,008h
 	ld c,040h
 	push af	
@@ -2347,6 +2357,8 @@ initialize_terminal_tables:
 	bit 3,(hl)
 	pop hl	
 	ret	
+; One software clock tick, called by the periodic frame callback.  C920 is
+; binary seconds (00-59); alarm records are tested at seconds 20 and 40.
 	ld hl,0c920h
 	ld de,(0c91dh)
 	ld a,(hl)	
@@ -2433,6 +2445,8 @@ initialize_terminal_tables:
 	jp 092a8h
 	ld (hl),000h
 	inc hl	
+; The year is a two-digit binary value.  It advances through 99 (63h), then
+; wraps to 00; the following date-display code renders it as two digits.
 	ld a,(hl)	
 	cp 063h
 	jr nc,$+5
@@ -2685,6 +2699,8 @@ initialize_terminal_tables:
 	dec a	
 	jr z,$+123
 	ret	
+; Parse a user-entered time into binary shadow fields C920-C923 and request
+; the interrupt service routine to program the ASIC.
 	ld a,(hl)	
 	call 08f19h
 	ret c	
@@ -2714,6 +2730,8 @@ initialize_terminal_tables:
 	set 0,(hl)
 	set 5,(hl)
 	jp 094aeh
+	; Calendar entry order: weekday, year, day-of-month, then month.  Year is
+	; accepted as the raw two-digit value; day is stored zero-based for ASIC I/O.
 	ld a,(hl)	
 	push hl	
 	push bc	

@@ -66,6 +66,9 @@
 	djnz $+0
 	ei	
 	ret	
+
+; Keyboard interrupt-side poll and acknowledge service.
+keyboard_interrupt_service:
 	bit 0,(iy-07eh)
 	jr nz,$+32
 	push ix
@@ -82,6 +85,9 @@
 	call 0051fh
 	pop ix
 	ret	
+
+; Translate a received make/break byte through the active keymap.
+translate_keyboard_scan_code:
 	call 041a2h
 	call 041eeh
 	ret c	
@@ -249,6 +255,9 @@
 	pop af	
 	ret	
 	ld a,086h
+
+; Submit the selected internal key token to the common event queue.
+enqueue_keyboard_token:
 	ld e,(iy-06eh)
 	jp 01ca5h
 	bit 0,a

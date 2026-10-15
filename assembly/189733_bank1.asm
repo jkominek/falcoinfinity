@@ -204,6 +204,9 @@
 	pop hl	
 	ldir
 	ret	
+
+; Dispatch translated key events. Token 9Eh is intercepted as Setup below.
+dispatch_terminal_key_token:
 	ld a,d	
 	ld hl,0b241h
 	ld bc,00005h
@@ -216,6 +219,7 @@
 	ret nz	
 	bit 7,e
 	jr nz,$+78
+	; A translated Setup token jumps to the setup-context handler in fixed ROM.
 	cp 09eh
 	jp z,03ec3h
 	call 04138h
@@ -635,6 +639,9 @@
 	ld a,c	
 	call 09b91h
 	jr $+6
+	; Setup key input returns navigation tokens with carry set; the caller
+	; stores them for the cursor handler at 4064h.
+setup_menu_input_entry:
 	call 09cb5h
 	ret z	
 	jp c,04064h
@@ -5147,6 +5154,8 @@
 	ld a,(hl)	
 	pop bc	
 	ret	
+; Read two translated tokens and try the counted first-key/second-key maps.
+setup_menu_key_loop:
 	set 5,(ix-00eh)
 	call 04980h
 	call 09dd6h
@@ -5209,6 +5218,8 @@
 	call 04980h
 	pop af	
 	ret	
+	; Select the current setting's edit table and apply the next key input.
+edit_setup_menu_setting:
 	ld hl,09e45h
 	add hl,bc	
 	add hl,bc	
@@ -5260,7 +5271,11 @@
 	jp 09d32h
 	push hl	
 	jr $-77
-	push bc	
+
+; B is the first token and C the second. The first-key table supplies a
+; pointer to the accepted second-token list for that key.
+match_setup_menu_key_pair:
+	push bc
 	ld a,b	
 	call 075a9h
 	pop bc	
@@ -5292,6 +5307,11 @@
 	scf	
 	ret z	
 	jr $-43
+
+; Fetch and normalize the next key token. EC/7F are terminators (Falco scan
+; 27h Backspace, plain/Shift). Printable tokens pass through; A2h-B9h use the
+; personality translator. Tokens BAh and above use the special-key path.
+read_setup_menu_key:
 	call 06ff3h
 	cp 0ech
 	ret z	
@@ -5311,412 +5331,177 @@
 	call 09c58h
 	or a	
 	ret	
-	inc b	
-	cpl	
-	ld sp,06141h
-	ld bc,0069eh
-	sbc a,(hl)	
-	dec bc	
-	sbc a,(hl)	
-	ld c,09eh
-	ld (bc),a	
-	ld d,l	
-	or l	
-	ld (hl),l	
-	or l	
-	ld (bc),a	
-	ld (034bdh),a
-	cp h	
-	ld bc,0c645h
-	ld bc,0e665h
-	ld (bc),a	
-	ld c,a	
-	ld l,a	
-	jr $-96
-	dec de	
-	sbc a,(hl)	
-	ld bc,0d745h
-	ld bc,0f765h
-	inc b	
-	dec l	
-	inc sp	
-	ld d,h	
-	ld (hl),h	
-	dec hl	
-	sbc a,(hl)	
-	ld l,09eh
-	ld sp,0349eh
-	sbc a,(hl)	
-	ld bc,0ac2ch
-	ld bc,0be34h
-	ld bc,0de48h
-	ld bc,0fe68h
-	dec c	
-	cp 027h
-	ld h,b	
-	ld e,(hl)	
-	ld a,(hl)	
-	or b	
-	ld (08180h),hl
-	add a,d	
-	add a,e	
-	add a,h	
-	add a,l	
-	add a,09eh
-	ld e,a	
-	sbc a,(hl)	
-	sbc a,c	
-	sbc a,(hl)	
-	halt	
-	sbc a,(hl)	
-	or b	
-	sbc a,(hl)	
-	cp a	
-	sbc a,(hl)	
-	add a,09eh
-	add a,09eh
-	ld e,a	
-	sbc a,(hl)	
-	sbc a,c	
-	sbc a,(hl)	
-	halt	
-	sbc a,(hl)	
-	or b	
-	sbc a,(hl)	
-	cp a	
-	sbc a,(hl)	
-	dec bc	
-	jr nz,$+41
-	ld b,c	
-	pop bc	
-	ld b,l	
-	ret	
-	ld c,c	
-	call 0d34fh
-	ld d,l	
-	jp c,0e161h
-	ld h,l	
-	jp (hl)	
-	ld l,c	
-	rld
-	di	
-	ld (hl),l	
-	jp m,02011h
-	ld e,(hl)	
-	ld l,0b7h
-	cpl	
-	ld a,h	
-	jr nc,$-78
-	ld sp,032b9h
-	or d	
-	inc sp	
-	or e	
-	ld b,c	
-	jp nz,0ca45h
-	ld c,c	
-	adc a,04fh
-	call nc,0db55h
-	ld h,c	
-	jp po,0ea65h
-	ld l,c	
-	xor 06fh
-	call p,0fb75h
-	dec bc	
-	jr nz,$+98
-	ld b,c	
-	ret nz	
-	ld b,l	
-	ret z	
-	ld c,c	
-	call z,0d24fh
-	ld d,l	
-	exx	
-	ld h,c	
-	ret po	
-	ld h,l	
-	ret pe	
-	ld l,c	
-	call pe,0f26fh
-	ld (hl),l	
-	ld sp,hl	
-	rlca	
-	jr nz,$+128
-	ld b,c	
-	jp 0d14eh
-	ld c,a	
-	push de	
-	ld h,c	
-	ex (sp),hl	
-	ld l,(hl)	
-	pop af	
-	ld l,a	
-	push af	
-	inc bc	
-	jr nz,$-78
-	ld b,c	
-	push bc	
-	ld h,c	
-	push hl	
-	dec bc	
-	jr nz,$+36
-	ld b,c	
-	call nz,0cb45h
-	ld c,c	
-	rst 8	
-	ld c,a	
-	sub 055h
-	call c,0e461h
-	ld h,l	
-	ex de,hl	
-	ld l,c	
-	rst 28h	
-	ld l,a	
-	or 075h
-	call m,0fe03h
-	ld (0e780h),hl
-	sbc a,(hl)	
-	rst 20h	
-	sbc a,(hl)	
-	rst 20h	
-	sbc a,(hl)	
-	ld (bc),a	
-	ld e,c	
-	defb 0ddh,079h,0fdh	;illegal sequence
-	rlca	
-	cp 022h
-	add a,b	
-	add a,c	
-	daa	
-	add a,e	
-	ld e,(hl)	
-	ld (bc),a	
-	sbc a,a	
-	ld (bc),a	
-	sbc a,a	
-	ld (bc),a	
-	sbc a,a	
-	add hl,bc	
-	sbc a,a	
-	add hl,bc	
-	sbc a,a	
-	ld c,09fh
-	ld c,09fh
-	inc bc	
-	jr nz,$-86
-	ld (079a8h),hl
-	rst 38h	
-	ld (bc),a	
-	ld e,c	
-	defb 0ddh,079h,0fdh	;illegal sequence
-	inc bc	
-	ld hl,02da6h
-	xor a	
-	ld e,a	
-	xor a	
-	rla	
-	jr nz,$+35
-	dec hl	
-	inc l	
-	jr z,$+43
-	ld hl,(02f2dh)
-	jr nc,$+62
-	dec a	
-	ld a,03fh
-	ld b,c	
-	ld b,e	
-	ld c,a	
-	ld d,e	
-	ld e,a	
-	ld h,c	
-	ld h,e	
-	ld l,a	
-	ld (hl),e	
-	ld e,e	
-	sbc a,a	
-	ld h,b	
-	sbc a,a	
-	ld l,e	
-	sbc a,a	
-	ld (hl),b	
-	sbc a,a	
-	ld (hl),l	
-	sbc a,a	
-	ld a,d	
-	sbc a,a	
-	ld a,a	
-	sbc a,a	
-	add a,h	
-	sbc a,a	
-	adc a,l	
-	sbc a,a	
-	sbc a,d	
-	sbc a,a	
-	and l	
-	sbc a,a	
-	xor b	
-	sbc a,a	
-	or c	
-	sbc a,a	
-	or h	
-	sbc a,a	
-	or a	
-	sbc a,a	
-	cp (hl)	
-	sbc a,a	
-	push bc	
-	sbc a,a	
-	call z,0cf9fh
-	sbc a,a	
-	call nc,0d79fh
-	sbc a,a	
-	call c,0df9fh
-	sbc a,a	
-	ld (bc),a	
-	inc hl	
-	or b	
-	daa	
-	daa	
-	dec b	
-	ld hl,050a1h
-	or (hl)	
-	ld d,e	
-	and a	
-	ld (hl),b	
-	or (hl)	
-	ld (hl),e	
-	and a	
-	ld (bc),a	
-	dec hl	
-	inc hl	
-	dec l	
-	or c	
-	ld (bc),a	
-	ld b,e	
-	rst 0	
-	ld h,e	
-	rst 20h	
-	ld (bc),a	
-	jr z,$+93
-	dec l	
-	ld a,e	
-	ld (bc),a	
-	add hl,hl	
-	ld e,l	
-	dec l	
-	ld a,l	
-	ld (bc),a	
-	ld b,c	
-	push bc	
-	ld h,c	
-	push hl	
-	inc b	
-	ld c,h	
-	and e	
-	ld e,c	
-	and l	
-	ld l,h	
-	and e	
-	ld a,c	
-	and l	
-	ld b,02fh
-	ld e,h	
-	inc a	
-	ld e,h	
-	ld b,e	
-	and d	
-	ld c,a	
-	ret c	
-	ld h,e	
-	and d	
-	ld l,a	
-	ret m	
-	dec b	
-	ld b,e	
-	xor c	
-	ld d,e	
-	and a	
-	ld e,(hl)	
-	or b	
-	ld h,e	
-	xor c	
-	ld (hl),e	
-	and a	
-	ld bc,0ab3ch
-	inc b	
-	ld c,h	
-	and e	
-	ld e,c	
-	and l	
-	ld l,h	
-	and e	
-	ld a,c	
-	and l	
-	ld bc,0bb3eh
-	ld bc,0bf3fh
-	inc bc	
-	ld b,c	
-	ld b,b	
-	ld h,c	
-	ld b,b	
-	ld e,a	
-	xor d	
-	inc bc	
-	ld c,a	
-	xor c	
-	ld l,a	
-	xor c	
-	ld a,h	
-	and d	
-	inc bc	
-	ld d,e	
-	and a	
-	ld (hl),e	
-	and a	
-	ld e,a	
-	cp d	
-	ld bc,0a76fh
-	ld (bc),a	
-	ld l,a	
-	cp d	
-	ld h,c	
-	xor d	
-	ld bc,04061h
-	ld (bc),a	
-	ld l,a	
-	xor c	
-	ld a,h	
-	and d	
-	ld bc,0a773h
-	ld bc,0df73h
-	inc b	
-	jr nc,$+81
-	ld e,b	
-	ld l,a	
-	rst 28h	
-	sbc a,a	
-	rst 28h	
-	sbc a,a	
-	call p,0f79fh
-	sbc a,a	
-	ld (bc),a	
-	ld e,b	
-	xor b	
-	ld a,b	
-	xor b	
-	ld bc,0a86fh
-	ld bc,0a878h
-	inc c	
-	jr nz,$+35
-	daa	
-	inc l	
-	dec l	
-	jr nc,$+81
-	ld e,b	
-	ld e,(hl)	
-	ld l,a	
-	ld a,b	
-	ld a,h	
-	rra	
+
+; Counted Setup key-binding and value-acceptance tables (not Z80 code).
+setup_menu_key_table_data:
+
+; First-key tokens / (scan 64h), 1 (1Bh), Shift+A/A (45h).
+setup_key_pair_dispatch_table_a:
+	defb 004h,02fh,031h,041h,061h,001h,09eh,006h
+	defb 09eh,00bh,09eh,00eh,09eh
+
+; After slash, accept Shift+U (scan 36h) or internal token B5h.
+setup_keys_after_slash:
+	defb 002h,055h,0b5h,075h,0b5h
+
+; After 1 (scan 1Bh), accept 2 (scan 1Ch) or F4 (scan 05h).
+setup_keys_after_1:
+	defb 002h,032h,0bdh,034h,0bch
+
+; After Shift+A (scan 45h), accept Shift+E (scan 32h).
+setup_keys_after_upper_a:
+	defb 001h,045h,0c6h
+
+; After a (scan 45h), accept e (scan 32h).
+setup_keys_after_lower_a:
+	defb 001h,065h,0e6h
+
+; First-key tokens Shift+O/o (scan 38h).
+setup_key_pair_dispatch_table_b:
+	defb 002h,04fh,06fh,018h,09eh,01bh,09eh
+
+; After Shift+O (scan 38h), accept Shift+E (scan 32h).
+setup_keys_after_upper_o:
+	defb 001h,045h,0d7h
+
+; After o (scan 38h), accept e (scan 32h).
+setup_keys_after_lower_o:
+	defb 001h,065h,0f7h
+
+; First-key tokens minus (25h), 3 (1Dh), Shift+T/t (34h).
+setup_key_pair_dispatch_table_c:
+	defb 004h,02dh,033h,054h,074h,02bh,09eh,02eh
+	defb 09eh,031h,09eh,034h,09eh
+
+; After minus (scan 25h), accept comma (scan 62h).
+setup_keys_after_minus:
+	defb 001h,02ch,0ach
+
+; After 3 (scan 1Dh), accept 4 (scan 1Eh).
+setup_keys_after_3:
+	defb 001h,034h,0beh
+
+; After Shift+T (scan 34h), accept Shift+H (scan 4Ah).
+setup_keys_after_upper_t:
+	defb 001h,048h,0deh
+
+; After t (scan 34h), accept h (scan 4Ah).
+setup_keys_after_lower_t:
+	defb 001h,068h,0feh
+
+; Extended map includes Ctrl (80h), Shift (82h/83h), Alt (84h), and special tokens.
+setup_key_pair_dispatch_table_d:
+	defb 00dh,0feh,027h,060h,05eh,07eh,0b0h,022h
+	defb 080h,081h,082h,083h,084h,085h
+
+; Word pointers selected by the setting index.
+setup_setting_edit_pointer_table:
+	defb 0c6h,09eh,05fh,09eh,099h,09eh,076h,09eh
+	defb 0b0h,09eh,0bfh,09eh,0c6h,09eh,0c6h,09eh
+	defb 05fh,09eh,099h,09eh,076h,09eh,0b0h,09eh
+	defb 0bfh,09eh
+
+; Second-key candidates for extended bindings.
+setup_second_key_table_a:
+	defb 00bh,020h,027h,041h,0c1h,045h,0c9h,049h
+	defb 0cdh,04fh,0d3h,055h,0dah,061h,0e1h,065h
+	defb 0e9h,069h,0edh,06fh,0f3h,075h,0fah
+
+; Second-key candidates for extended bindings.
+setup_second_key_table_b:
+	defb 011h,020h,05eh,02eh,0b7h,02fh,07ch,030h
+	defb 0b0h,031h,0b9h,032h,0b2h,033h,0b3h,041h
+	defb 0c2h,045h,0cah,049h,0ceh,04fh,0d4h,055h
+	defb 0dbh,061h,0e2h,065h,0eah,069h,0eeh,06fh
+	defb 0f4h,075h,0fbh
+
+; Second-key candidates for extended bindings.
+setup_second_key_table_c:
+	defb 00bh,020h,060h,041h,0c0h,045h,0c8h,049h
+	defb 0cch,04fh,0d2h,055h,0d9h,061h,0e0h,065h
+	defb 0e8h,069h,0ech,06fh,0f2h,075h,0f9h
+
+; Second-key candidates for extended bindings.
+setup_second_key_table_d:
+	defb 007h,020h,07eh,041h,0c3h,04eh,0d1h,04fh
+	defb 0d5h,061h,0e3h,06eh,0f1h,06fh,0f5h
+
+; Second-key candidates for extended bindings.
+setup_second_key_table_e:
+	defb 003h,020h,0b0h,041h,0c5h,061h,0e5h
+
+; Second-key candidates for extended bindings.
+setup_second_key_table_f:
+	defb 00bh,020h,022h,041h,0c4h,045h,0cbh,049h
+	defb 0cfh,04fh,0d6h,055h,0dch,061h,0e4h,065h
+	defb 0ebh,069h,0efh,06fh,0f6h,075h,0fch
+
+; Alternate first-key map.
+setup_key_pair_dispatch_table_e:
+	defb 003h,0feh,022h,080h,0e7h,09eh,0e7h,09eh
+	defb 0e7h,09eh
+
+; Second-key candidates for alternate bindings.
+setup_second_key_table_g:
+	defb 002h,059h,0ddh,079h,0fdh
+
+; Additional alternate first-key map.
+setup_key_pair_dispatch_table_f:
+	defb 007h,0feh,022h,080h,081h,027h,083h,05eh
+	defb 002h,09fh,002h,09fh,002h,09fh,009h,09fh
+	defb 009h,09fh,00eh,09fh,00eh,09fh
+
+; Second-key candidates for alternate bindings.
+setup_second_key_table_h:
+	defb 003h,020h,0a8h,022h,0a8h,079h,0ffh
+
+; Second-key candidates for alternate bindings.
+setup_second_key_table_i:
+	defb 002h,059h,0ddh,079h,0fdh
+
+; Second-key candidates for alternate bindings.
+setup_second_key_table_j:
+	defb 003h,021h,0a6h,02dh,0afh,05fh,0afh
+
+; First-key tokens: Space, !, +, comma, (, ), *, -, /, 0, <, =, >, ?, A, C, O, S, _, a, c, o, s; each points to a second-key list.
+setup_character_choice_dispatch_table:
+	defb 017h,020h,021h,02bh,02ch,028h,029h,02ah
+	defb 02dh,02fh,030h,03ch,03dh,03eh,03fh,041h
+	defb 043h,04fh,053h,05fh,061h,063h,06fh,073h
+	defb 05bh,09fh,060h,09fh,06bh,09fh,070h,09fh
+	defb 075h,09fh,07ah,09fh,07fh,09fh,084h,09fh
+	defb 08dh,09fh,09ah,09fh,0a5h,09fh,0a8h,09fh
+	defb 0b1h,09fh,0b4h,09fh,0b7h,09fh,0beh,09fh
+	defb 0c5h,09fh,0cch,09fh,0cfh,09fh,0d4h,09fh
+	defb 0d7h,09fh,0dch,09fh,0dfh,09fh,002h,023h
+	defb 0b0h,027h,027h,005h,021h,0a1h,050h,0b6h
+	defb 053h,0a7h,070h,0b6h,073h,0a7h,002h,02bh
+	defb 023h,02dh,0b1h,002h,043h,0c7h,063h,0e7h
+	defb 002h,028h,05bh,02dh,07bh,002h,029h,05dh
+	defb 02dh,07dh,002h,041h,0c5h,061h,0e5h,004h
+	defb 04ch,0a3h,059h,0a5h,06ch,0a3h,079h,0a5h
+	defb 006h,02fh,05ch,03ch,05ch,043h,0a2h,04fh
+	defb 0d8h,063h,0a2h,06fh,0f8h,005h,043h,0a9h
+	defb 053h,0a7h,05eh,0b0h,063h,0a9h,073h,0a7h
+	defb 001h,03ch,0abh,004h,04ch,0a3h,059h,0a5h
+	defb 06ch,0a3h,079h,0a5h,001h,03eh,0bbh,001h
+	defb 03fh,0bfh,003h,041h,040h,061h,040h,05fh
+	defb 0aah,003h,04fh,0a9h,06fh,0a9h,07ch,0a2h
+	defb 003h,053h,0a7h,073h,0a7h,05fh,0bah,001h
+	defb 06fh,0a7h,002h,06fh,0bah,061h,0aah,001h
+	defb 061h,040h,002h,06fh,0a9h,07ch,0a2h,001h
+	defb 073h,0a7h,001h,073h,0dfh
+
+; Alternate printable first-key tokens and second-key pointers.
+setup_character_choice_dispatch_table_b:
+	defb 004h,030h,04fh,058h,06fh,0efh,09fh,0efh
+	defb 09fh,0f4h,09fh,0f7h,09fh,002h,058h,0a8h
+	defb 078h,0a8h,001h,06fh,0a8h,001h,078h,0a8h
+
+; Alternate printable first-key tokens and second-key pointers.
+setup_character_choice_dispatch_table_c:
+	defb 00ch,020h,021h,027h,02ch,02dh,030h,04fh
+	defb 058h,05eh,06fh,078h,07ch,01fh
 	and b	
 	ld (025a0h),hl
 	and b	

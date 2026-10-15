@@ -149,6 +149,12 @@ check_initialization_status:
 	bit 0,a
 	ret	
 
+; Detect installed RAM and screen-memory organization.  The video ASIC's
+; CPU aperture is e000-ffff (8 KiB); I/O port 52 selects which page appears
+; there.  The upper nibble selects screen RAM pages, while bit 3 selects
+; the separate character-generator RAM.  This loop checks both 4 KiB halves
+; of each selected screen page, then temporarily maps pages 0 and 8 while
+; copying/testing memory.  It restores page 0 before returning.
 detect_ram_configuration:
 	ld a,(0c363h)
 	push af	
@@ -179,6 +185,7 @@ detect_ram_configuration:
 	sub 010h
 	push af	
 	call 03426h
+	; A is the page selector prepared above; map that screen page at e000.
 	out (052h),a
 	ld hl,0e000h
 	ld bc,01000h
@@ -202,6 +209,7 @@ detect_ram_configuration:
 	ld bc,02000h
 	ldir
 	ld a,010h
+	; Select page 1 (port value 10h) for the following RAM test.
 	out (052h),a
 	ld hl,00000h
 	add hl,sp	
@@ -216,6 +224,7 @@ detect_ram_configuration:
 	pop hl	
 	ld sp,hl	
 	sub a	
+	; Restore screen page 0 before copying back through the aperture.
 	out (052h),a
 	ld a,c	
 	ld hl,0e000h
@@ -228,6 +237,7 @@ detect_ram_configuration:
 	ld hl,0e000h
 	ld bc,02000h
 	ld a,008h
+	; Port bit 3 maps the dedicated character-generator RAM into e000-ffff.
 	out (052h),a
 	call 03adbh
 	jr z,$+6
@@ -271,11 +281,18 @@ initialize_ctc:
 	ld a,050h
 	out (070h),a
 	ret	
+; Update a CTC channel that supplies SIO baud clocks. A is the baud-choice
+; index (0-15); channel A is CTC 0 and channel B is CTC 1. The table word is
+; written low byte first (control word), then high byte (time constant).
+; 25h selects timer mode /256, 05h timer mode /16, and 45h counter mode.
+set_sio_a_baud_clock:
 	ld c,070h
 	ld hl,0c008h
 	jr $+7
+set_sio_b_baud_clock:
 	ld c,071h
 	ld hl,0c009h
+	; Baud table at 2651h: 50..38400 choices map to CTC mode/time pairs.
 	ld de,02651h
 	ld iy,0c080h
 	bit 1,(iy-07fh)
@@ -4478,7 +4495,7 @@ interrupt_service_body:
 	ret	
 	ld a,(0c055h)
 	and 00fh
-	call 00252h
+	call set_sio_a_baud_clock
 	push iy
 	ld iy,0c22eh
 	ld de,0244dh
@@ -4532,7 +4549,7 @@ interrupt_service_body:
 	jp 02575h
 	ld a,(0c05dh)
 	and 00fh
-	call 00259h
+	call set_sio_b_baud_clock
 	push iy
 	ld iy,0c280h
 	ld de,024c7h
@@ -4675,6 +4692,9 @@ interrupt_service_body:
 	ld d,a	
 	sub a	
 	ld (iy+012h),a
+	; SIO WR4 base: asynchronous, one stop bit, x16 external clock. The
+	; baud-rate table programs the CTC clocks; this x16 mode makes their
+	; output frequency sixteen times the selected line rate.
 	ld a,044h
 	bit 4,e
 	jr z,$+4
@@ -8151,6 +8171,9 @@ interrupt_service_body:
 	ld e,a	
 	ld d,000h
 	jp 0296ah
+	; Token 9Eh arrives here from the terminal key dispatcher at 81AEh.
+	; Both context flags must be set before Setup mode is activated.
+setup_key_context_handler:
 	bit 7,(ix+044h)
 	jp z,040e4h
 	bit 7,(ix+043h)
@@ -8359,6 +8382,9 @@ interrupt_service_body:
 	ret z	
 	cp 030h
 	ret	
+	; Save the navigation token returned by the Setup input path. Falco
+	; scans 53h/67h/68h/74h map to CAh/CBh/CCh/CDh (Up/Down/Right/Left).
+store_setup_navigation_key:
 	ld hl,0c69dh
 	ld (hl),a	
 	ld a,001h
@@ -9737,6 +9763,8 @@ interrupt_service_body:
 	ld b,d	
 	ld b,c	
 	ld d,b	
+	; Select the Setup menu page from the current terminal/menu state.
+setup_menu_select_page:
 	ld hl,04ae9h
 	bit 5,(ix-00eh)
 	jr nz,$+24
@@ -11945,6 +11973,8 @@ interrupt_service_body:
 	pop bc	
 	pop af	
 	ret	
+	; Mark Setup mode active, then dispatch the selected Setup menu page.
+activate_setup_menu:
 	ld hl,0c001h
 	set 5,(hl)
 	jp 04ab6h

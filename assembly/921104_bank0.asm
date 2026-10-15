@@ -4,6 +4,11 @@
 	org	08000h
 
 ; Probe screen RAM banking and ASIC option bits during board startup.
+; The 8 KiB CPU aperture at e000-ffff is selected through ASIC I/O port 52.
+; This initial probe compares bank values 00/80 and 20/a0 to detect
+; whether the selected pages retain independent data. A failed comparison
+; establishes aliasing or unusable backing, but cannot distinguish an alias
+; from an unpopulated page returning an undriven bus by itself.
 detect_board_memory_and_asic:
 	set 4,(iy-07bh)
 	ld hl,0e000h
@@ -64,6 +69,8 @@ read_asic_register:
 	and 0f1h
 	ret	
 test_screen_ram:
+	; C=52 selects the CPU-visible screen-RAM page; D and E are the
+	; candidate page values supplied by detect_board_memory_and_asic.
 	ld c,052h
 	out (c),d
 	ld (hl),055h

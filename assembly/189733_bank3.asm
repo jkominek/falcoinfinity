@@ -66,6 +66,9 @@
 	djnz $+0
 	ei	
 	ret	
+
+; Keyboard interrupt-side poll and acknowledge service.
+keyboard_interrupt_service:
 	bit 0,(iy-07eh)
 	jr nz,$+32
 	push ix
@@ -82,6 +85,9 @@
 	call 00530h
 	pop ix
 	ret	
+
+; Translate a received make/break byte through the active keymap.
+translate_keyboard_scan_code:
 	call 0408bh
 	call 040d7h
 	ret c	
@@ -249,8 +255,12 @@
 	pop af	
 	ret	
 	ld a,086h
+
+; Submit the selected internal key token to the common event queue.
+enqueue_keyboard_token:
 	ld e,(iy-06eh)
 	jp 01b8bh
+; Probe the clock/calendar block's status through the ASIC nibble aperture.
 	call 08316h
 	ld a,0cch
 	call 08327h
@@ -276,6 +286,9 @@
 	pop bc	
 	cp b	
 	ret	
+; Commit shadow date fields C924-C927 to the ASIC: month, year, day-of-month
+; (the shadow is zero-based, hence INC), and day-of-week.  The weekday also
+; selects the ASIC's calendar mode via bit 2 in the year write helper.
 	call 08316h
 	ld a,(0c924h)
 	ld b,068h
@@ -298,6 +311,8 @@
 	ld c,000h
 	call 08299h
 	jp 08360h
+; Commit the shadow time to the ASIC.  Seconds are reset separately by the
+; interrupt-side seconds routine; these writes set minute and 12-hour time.
 	call 08316h
 	ld b,008h
 	call 08331h
@@ -327,6 +342,9 @@
 	ld a,e	
 	or c	
 	jp 08331h
+; Read the ASIC calendar/time into C920-C927: seconds, minutes, hour,
+; AM/PM, month, year, day-of-month, weekday.  Values are binary components;
+; the ASIC's selector nibbles are assembled by read_clock_field below.
 	call 08316h
 	ld b,00ch
 	ld c,007h
